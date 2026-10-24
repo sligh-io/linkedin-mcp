@@ -87,7 +87,10 @@ export function createServer(client: LinkedInClient): McpServer {
         image: z
           .string()
           .optional()
-          .describe("Attach an image: absolute local file path or http(s) URL (JPG, PNG, GIF). Cannot be combined with link_url."),
+          .describe(
+            "Attach an image (JPG, PNG, GIF, WEBP): a file name or path inside the media folder " +
+              "(LINKEDIN_MEDIA_DIR, default ~/LinkedIn/media), or an https:// image URL. Cannot be combined with link_url.",
+          ),
         image_alt_text: z.string().max(4086).optional().describe("Alt text for the image."),
         organization_id: organizationId,
         convert_hashtags: z.boolean().default(true).describe("Convert #words into LinkedIn hashtags."),

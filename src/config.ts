@@ -5,6 +5,20 @@ import { dirname, join } from "node:path";
 
 export const DEFAULT_API_VERSION = "202608";
 
+/**
+ * How to re-run sign-in. Always the GitHub source: the npm package named
+ * "linkedin-mcp" is an unrelated project by another maintainer.
+ */
+export const AUTH_COMMAND = "npx -y github:sligh-io/linkedin-mcp auth";
+
+/**
+ * Local images may only be read from this folder (or below it), so a prompt cannot
+ * make the agent upload arbitrary files from the machine. Override with LINKEDIN_MEDIA_DIR.
+ */
+export function mediaDir(): string {
+  return process.env.LINKEDIN_MEDIA_DIR || join(homedir(), "LinkedIn", "media");
+}
+
 export interface StoredToken {
   access_token: string;
   expires_at?: number;
@@ -72,12 +86,12 @@ export async function resolveAccessToken(): Promise<string> {
   const stored = await loadStoredToken();
   if (!stored?.access_token) {
     throw new Error(
-      "No LinkedIn access token found. Set LINKEDIN_ACCESS_TOKEN or run `npx linkedin-mcp auth` once.",
+      `No LinkedIn access token found. Set LINKEDIN_ACCESS_TOKEN or run \`${AUTH_COMMAND}\` once.`,
     );
   }
   if (stored.expires_at && stored.expires_at < Date.now()) {
     throw new Error(
-      `The stored LinkedIn access token expired on ${new Date(stored.expires_at).toISOString()}. Run \`npx linkedin-mcp auth\` again.`,
+      `The stored LinkedIn access token expired on ${new Date(stored.expires_at).toISOString()}. Run \`${AUTH_COMMAND}\` again.`,
     );
   }
   return stored.access_token;

@@ -1,7 +1,7 @@
 {
   "name": "linkedin-mcp",
   "version": "0.2.1",
-  "description": "Open-source MCP server for the official LinkedIn API — automate posts on your personal profile from Claude, ChatGPT, Cursor and any MCP client.",
+  "description": "Open-source MCP server for the official LinkedIn API \u2014 automate posts on your personal profile from Claude, ChatGPT, Cursor and any MCP client.",
   "type": "module",
   "bin": {
     "linkedin-mcp": "dist/index.js"
@@ -35,21 +35,21 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vlpmedialtd/linkedin-mcp.git"
+    "url": "git+https://github.com/sligh-io/linkedin-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/vlpmedialtd/linkedin-mcp/issues"
+    "url": "https://github.com/sligh-io/linkedin-mcp/issues"
   },
-  "homepage": "https://github.com/vlpmedialtd/linkedin-mcp#readme",
+  "homepage": "https://github.com/sligh-io/linkedin-mcp#readme",
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "zod": "^4.0.0"
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.9.3"
+    "@types/node": "22.20.2",
+    "typescript": "5.9.3"
   }
 }
