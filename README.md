@@ -1,11 +1,13 @@
 # linkedin-mcp
 
-[![CI](https://github.com/vlpmedialtd/linkedin-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/vlpmedialtd/linkedin-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/sligh-io/linkedin-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/sligh-io/linkedin-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **Post to LinkedIn from Claude, ChatGPT, Cursor or any AI assistant — on your personal profile, through the official LinkedIn API.**
 
 `linkedin-mcp` is an open-source [Model Context Protocol](https://modelcontextprotocol.io) server. You sign in once with your own LinkedIn developer app, and your assistant can publish text, link and image posts, comment and react. No scraping, no password sharing, no browser automation.
+
+> **Hardened fork** of [vlpmedialtd/linkedin-mcp](https://github.com/vlpmedialtd/linkedin-mcp): local images are restricted to one folder, image URLs must be HTTPS images, dependencies are fixed to exact versions, and every command uses the GitHub source instead of the unrelated `linkedin-mcp` npm package.
 
 > **No company account needed.** It works with a normal personal LinkedIn profile. LinkedIn only asks you to link your developer app to a Page, and you can create one yourself in a minute (see [step 1](#1-create-a-linkedin-app-5-minutes)).
 
@@ -78,7 +80,7 @@ You need **Node.js 22+** (`node -v`) and a LinkedIn account.
 Run this in your terminal. It's the only command you need, and it asks for everything:
 
 ```bash
-npx -y github:vlpmedialtd/linkedin-mcp auth
+npx -y github:sligh-io/linkedin-mcp auth
 ```
 
 1. `LinkedIn Client ID:` → paste the Client ID, press Enter
@@ -97,7 +99,7 @@ These clients start the server locally on your computer.
 **Claude Code**
 
 ```bash
-claude mcp add -s user linkedin -- npx -y github:vlpmedialtd/linkedin-mcp
+claude mcp add -s user linkedin -- npx -y github:sligh-io/linkedin-mcp
 ```
 
 Check with `claude mcp list` (should show `linkedin … ✓ Connected`), then start a new session.
@@ -109,7 +111,7 @@ Check with `claude mcp list` (should show `linkedin … ✓ Connected`), then st
   "mcpServers": {
     "linkedin": {
       "command": "npx",
-      "args": ["-y", "github:vlpmedialtd/linkedin-mcp"]
+      "args": ["-y", "github:sligh-io/linkedin-mcp"]
     }
   }
 }
@@ -124,7 +126,7 @@ Restart the app. Test it by asking *"Who am I on LinkedIn?"*. This only reads yo
 >   "mcpServers": {
 >     "linkedin": {
 >       "command": "/Users/you/.local/bin/npx",
->       "args": ["-y", "github:vlpmedialtd/linkedin-mcp"],
+>       "args": ["-y", "github:sligh-io/linkedin-mcp"],
 >       "env": { "PATH": "/Users/you/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" }
 >     }
 >   }
@@ -144,7 +146,7 @@ ChatGPT can't start programs on your computer. It connects to MCP servers over *
 **1. Start the HTTP server** (terminal 1, keep it running)
 
 ```bash
-npx -y github:vlpmedialtd/linkedin-mcp http
+npx -y github:sligh-io/linkedin-mcp http
 ```
 
 It prints your secret endpoint, for example `http://127.0.0.1:3000/mcp/Xy7…`. The part after `/mcp/` is a random secret stored in `~/.config/linkedin-mcp/http-token`, so it stays the same across restarts.
@@ -197,7 +199,7 @@ useradd --system --home /var/lib/linkedin-mcp --create-home --shell /usr/sbin/no
 ```
 
 ```bash
-git clone https://github.com/vlpmedialtd/linkedin-mcp.git /opt/linkedin-mcp && cd /opt/linkedin-mcp && npm ci && npm run build
+git clone https://github.com/sligh-io/linkedin-mcp.git /opt/linkedin-mcp && cd /opt/linkedin-mcp && npm ci && npm run build
 ```
 
 Node must be 22 or newer (`node -v`). Otherwise install it from [NodeSource](https://github.com/nodesource/distributions).
@@ -284,7 +286,7 @@ Keep in mind:
 | Problem | Cause & fix |
 | --- | --- |
 | "Do I need a company account?" | No. You only need a Page to *create* the developer app (step 1.1). Posts go to your personal profile. |
-| Terminal shows `dquote>` or `zsh: no matches found` | A value was pasted directly behind the command. Press `Ctrl+C`, run only `npx -y github:vlpmedialtd/linkedin-mcp auth`, then paste values at the prompts. |
+| Terminal shows `dquote>` or `zsh: no matches found` | A value was pasted directly behind the command. Press `Ctrl+C`, run only `npx -y github:sligh-io/linkedin-mcp auth`, then paste values at the prompts. |
 | Browser: **"The redirect_uri does not match the registered value"** | The redirect URL is missing or differs in the app's **Auth** tab. Add exactly `http://localhost:8787/callback` and click **Update**. Watch for `https`, `127.0.0.1`, a trailing `/` or spaces. Then press `Ctrl+C` and run `auth` again. |
 | **`Token exchange failed (401): invalid_client`** | The Client Secret is wrong. If it says `received 14 characters`, you pasted the Client ID again. Copy *Primary Client Secret* with the copy icon (or generate a new one) and run `auth` again. |
 | Browser: `unauthorized_scope_error` | One of the two products isn't added yet. Check **Products → Added products** for *Share on LinkedIn* and *Sign In with LinkedIn using OpenID Connect*. |
@@ -302,7 +304,7 @@ Keep in mind:
 | **Claude Desktop chat has no LinkedIn tools** (but Claude Code does) | `claude mcp add` only configures Claude Code. Add the server to `claude_desktop_config.json` (step 3a) with the absolute `npx` path and `PATH`, then quit with `Cmd+Q` and reopen. |
 | Claude Desktop: `spawn npx ENOENT` / server failed | The app can't find Node. Use the absolute path from `which npx` plus an `env.PATH` (see step 3a). Logs: `~/Library/Logs/Claude/mcp-server-linkedin.log`. |
 
-Still stuck? [Open an issue](https://github.com/vlpmedialtd/linkedin-mcp/issues) with the error message. **Never post your Client Secret, access token or MCP URL.**
+Still stuck? [Open an issue](https://github.com/sligh-io/linkedin-mcp/issues) with the error message. **Never post your Client Secret, access token or MCP URL.**
 
 ---
 
@@ -336,6 +338,7 @@ All write tools accept an optional `organization_id` to act as a company page. T
 | `LINKEDIN_SCOPES` | `openid profile email w_member_social` | Scopes requested by `auth` |
 | `LINKEDIN_API_VERSION` | `202608` | `LinkedIn-Version` header (`YYYYMM`) |
 | `LINKEDIN_TOKEN_FILE` | `~/.config/linkedin-mcp/token.json` | Token storage |
+| `LINKEDIN_MEDIA_DIR` | `~/LinkedIn/media` | The only folder local images can be posted from |
 | `MCP_AUTH_TOKEN` | generated | Secret for the HTTP endpoint |
 | `PORT` / `HOST` | `3000` / `127.0.0.1` | HTTP mode listen address |
 
@@ -361,7 +364,7 @@ To post, comment and read statistics **as a company page**:
 3. Sign in with the extra scopes:
 
    ```bash
-   LINKEDIN_SCOPES="openid profile email w_member_social w_organization_social r_organization_social rw_organization_admin" npx -y github:vlpmedialtd/linkedin-mcp auth
+   LINKEDIN_SCOPES="openid profile email w_member_social w_organization_social r_organization_social rw_organization_admin" npx -y github:sligh-io/linkedin-mcp auth
    ```
 
 4. Ask *"Which LinkedIn pages do I manage?"*, then *"Post … on page 12345"*.
@@ -371,6 +374,8 @@ To post, comment and read statistics **as a company page**:
 ## Security
 
 - Tokens and the HTTP secret are stored locally with `600` permissions and are never logged.
+- Local images can only be read from `LINKEDIN_MEDIA_DIR` (symlinks are resolved first), and image URLs must be `https://` and served as `image/*`. This stops a prompt hidden in an email or web page from making the assistant publish other files.
+- Install from GitHub (`github:sligh-io/linkedin-mcp`), never `npx linkedin-mcp`: the npm package with that name is an unrelated project.
 - The Client Secret is only used during `auth` and is not saved.
 - **Anyone with your HTTP MCP URL can post as you.** Don't share it. Rotate it with `linkedin-mcp http --new-token`, then update the URL in ChatGPT.
 - The HTTP server listens on `127.0.0.1` by default and is only reachable through your tunnel.
@@ -381,7 +386,7 @@ To post, comment and read statistics **as a company page**:
 ## Development
 
 ```bash
-git clone https://github.com/vlpmedialtd/linkedin-mcp.git
+git clone https://github.com/sligh-io/linkedin-mcp.git
 cd linkedin-mcp
 npm install
 npm test                                              # build + tests (LinkedIn API is mocked)

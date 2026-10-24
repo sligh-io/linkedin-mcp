@@ -1,5 +1,6 @@
-import { readFile } from "node:fs/promises";
-import { DEFAULT_API_VERSION } from "./config.js";
+import { readFile, realpath } from "node:fs/promises";
+import { extname, isAbsolute, relative, resolve } from "node:path";
+import { DEFAULT_API_VERSION, mediaDir } from "./config.js";
 
 const API_BASE = "https://api.linkedin.com";
 
@@ -257,17 +258,47 @@ const MIME_BY_EXT: Record<string, string> = {
   webp: "image/webp",
 };
 
-async function loadBinary(source: string, fetchImpl: typeof fetch): Promise<{ bytes: Uint8Array; contentType: string }> {
-  const ext = source.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
+/**
+ * Loads an image to post. Guards against a prompt making the agent publish other data:
+ * - local files must be images inside the media folder (symlinks resolved first), and
+ * - remote images must be https:// and served with an image/* content type.
+ */
+export async function loadBinary(
+  source: string,
+  fetchImpl: typeof fetch,
+  allowedDir: string = mediaDir(),
+): Promise<{ bytes: Uint8Array; contentType: string }> {
   if (/^https?:\/\//i.test(source)) {
+    if (!/^https:\/\//i.test(source)) throw new Error("Image URLs must use https://.");
     const res = await fetchImpl(source);
     if (!res.ok) throw new Error(`Could not download image from ${source}: HTTP ${res.status}`);
-    return {
-      bytes: new Uint8Array(await res.arrayBuffer()),
-      contentType: res.headers.get("content-type") ?? MIME_BY_EXT[ext] ?? "application/octet-stream",
-    };
+    const contentType = res.headers.get("content-type")?.split(";")[0].trim().toLowerCase() ?? "";
+    if (!contentType.startsWith("image/")) {
+      throw new Error(`${source} is not an image (content type "${contentType || "unknown"}").`);
+    }
+    return { bytes: new Uint8Array(await res.arrayBuffer()), contentType };
   }
-  return { bytes: await readFile(source), contentType: MIME_BY_EXT[ext] ?? "application/octet-stream" };
+
+  const ext = extname(source).slice(1).toLowerCase();
+  const contentType = MIME_BY_EXT[ext];
+  if (!contentType) throw new Error(`Unsupported image type ".${ext}". Use ${Object.keys(MIME_BY_EXT).join(", ")}.`);
+  let root: string;
+  let file: string;
+  try {
+    root = await realpath(allowedDir);
+  } catch {
+    throw new Error(`The media folder ${allowedDir} does not exist. Create it and put images to post there.`);
+  }
+  try {
+    file = await realpath(isAbsolute(source) ? source : resolve(root, source));
+  } catch {
+    throw new Error(`Image not found: ${source}`);
+  }
+  const rel = relative(root, file);
+  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`Local images must be inside the media folder ${root} (set LINKEDIN_MEDIA_DIR to change it).`);
+  }
+  return { bytes: await readFile(file), contentType };
 }
 
 export function postUrl(postUrn: string): string {
